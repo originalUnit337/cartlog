@@ -1,5 +1,5 @@
 name: cartlog
-description: A sample command-line application.
+description: Telegram bot for tracking printer cartridges.
 version: 1.0.0
 # repository: https://github.com/my_org/my_repo
 
@@ -8,7 +8,9 @@ environment:
 
 # Add regular dependencies here.
 dependencies:
+  dotenv: ^4.2.0
   path: ^1.9.0
+  postgres: ^3.5.20
 
 dev_dependencies:
   lints: ^6.0.0
