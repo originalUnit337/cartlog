@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cartlog/application/cartridge/cartridge_service.dart';
+import 'package:cartlog/application/cartridge/cartridge_query_service.dart';
 import 'package:cartlog/domain/cartridge/entities/cartridge.dart';
 import 'package:cartlog/domain/cartridge/entities/cartridge_log_action.dart';
 import 'package:cartlog/domain/cartridge/entities/cartridge_status.dart';
@@ -27,6 +28,7 @@ void main() {
   late PostgresDatabase database;
   late PostgresCartridgeRepository cartridges;
   late PostgresCartridgeLogRepository logs;
+  late CartridgeQueryService cartridgeQueries;
   late PostgresCartridgeUnitOfWork unitOfWork;
   late CartridgeService service;
 
@@ -34,6 +36,7 @@ void main() {
     database = await PostgresDatabase.connect(DatabaseConfig.load());
     cartridges = PostgresCartridgeRepository(session: database.session);
     logs = PostgresCartridgeLogRepository(session: database.session);
+    cartridgeQueries = CartridgeQueryService(repository: cartridges);
     unitOfWork = PostgresCartridgeUnitOfWork(
       sessionExecutor: database.sessionExecutor,
     );
@@ -77,6 +80,12 @@ void main() {
       );
       expect(await cartridges.findByNumber(first.number), hasLength(2));
       expect(await cartridges.findByOffice('T-$suffix'), hasLength(2));
+      expect(
+        await cartridgeQueries.findByNumber(' ${first.number} '),
+        hasLength(2),
+      );
+      expect(await cartridgeQueries.findByOffice(' T-$suffix '), hasLength(2));
+      expect(await cartridgeQueries.findByNumber('missing-$suffix'), isEmpty);
       expect(
         (await cartridges.findByStatus(CartridgeStatus.inUse)).map((c) => c.id),
         contains(duplicateNumber.id),

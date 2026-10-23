@@ -8,6 +8,8 @@ final class StartHandler {
 
 Доступные команды:
 /list — показать список картриджей
+/number <номер> — найти картридж по номеру
+/office <кабинет> — найти картриджи по кабинету
 ''';
 
   void register(Bot<Context> bot) {

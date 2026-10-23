@@ -13,4 +13,5 @@ export 'domain/cartridge/repositories/cartridge_repository.dart';
 export 'infrastructure/config/app_config.dart';
 export 'infrastructure/config/telegram_bot_config.dart';
 export 'presentation/telegram/cartridge_list_formatter.dart';
+export 'presentation/telegram/handlers/cartridge_search_handler.dart';
 export 'presentation/telegram/telegram_bot.dart';

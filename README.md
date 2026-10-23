@@ -42,8 +42,9 @@ Start the bot:
 dart run bin/cartlog.dart
 ```
 
-Open the bot in Telegram and send `/start` for the welcome message or `/list` to
-see the current cartridges.
+Open the bot in Telegram and send `/start` for commands. `/list` shows all
+cartridges, `/number 001` searches by number, and `/office 101` searches by
+office. Searches return all exact matches.
 
 Environment variables set in the process take precedence over values in
 `.env`. Never commit the local `.env` file.

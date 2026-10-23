@@ -7,4 +7,10 @@ final class CartridgeQueryService {
   final CartridgeRepository repository;
 
   Future<List<Cartridge>> listAll() => repository.findAll();
+
+  Future<List<Cartridge>> findByNumber(String number) =>
+      repository.findByNumber(number.trim());
+
+  Future<List<Cartridge>> findByOffice(String office) =>
+      repository.findByOffice(office.trim());
 }

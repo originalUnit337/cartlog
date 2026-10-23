@@ -7,12 +7,26 @@ final class CartridgeListFormatter {
   String format(List<Cartridge> cartridges) {
     if (cartridges.isEmpty) return 'Картриджей пока нет.';
 
-    final lines = cartridges.map(
-      (cartridge) =>
-          '• #${cartridge.number} — ${cartridge.model} — кабинет '
-          '${cartridge.office} — ${cartridge.status.displayLabel}',
-    );
+    return 'Картриджи (${cartridges.length}):\n${_formatCartridges(cartridges)}';
+  }
 
-    return 'Картриджи (${cartridges.length}):\n${lines.join('\n')}';
+  String formatSearchResults({
+    required List<Cartridge> cartridges,
+    required String query,
+  }) {
+    if (cartridges.isEmpty) return 'По запросу «$query» ничего не найдено.';
+
+    return 'По запросу «$query» найдено: ${cartridges.length}\n'
+        '${_formatCartridges(cartridges)}';
+  }
+
+  String _formatCartridges(List<Cartridge> cartridges) {
+    return cartridges
+        .map(
+          (cartridge) =>
+              '• #${cartridge.number} — ${cartridge.model} — кабинет '
+              '${cartridge.office} — ${cartridge.status.displayLabel}',
+        )
+        .join('\n');
   }
 }
