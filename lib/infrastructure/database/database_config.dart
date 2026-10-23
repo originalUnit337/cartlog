@@ -1,6 +1,4 @@
-import 'dart:io';
-
-import 'package:dotenv/dotenv.dart';
+import 'package:cartlog/infrastructure/config/environment_loader.dart';
 import 'package:postgres/postgres.dart';
 
 final class DatabaseConfig {
@@ -13,7 +11,7 @@ final class DatabaseConfig {
     required this.sslMode,
   });
 
-  static const _variableNames = [
+  static const environmentVariableNames = [
     'DATABASE_HOST',
     'DATABASE_PORT',
     'DATABASE_NAME',
@@ -30,18 +28,12 @@ final class DatabaseConfig {
   final SslMode sslMode;
 
   factory DatabaseConfig.load({String envFile = '.env'}) {
-    final dotenv = DotEnv(quiet: true)..load([envFile]);
-    final environment = <String, String>{};
-
-    for (final name in _variableNames) {
-      final value = dotenv[name];
-      if (value != null) {
-        environment[name] = value;
-      }
-    }
-
-    environment.addAll(Platform.environment);
-    return DatabaseConfig.fromEnvironment(environment);
+    return DatabaseConfig.fromEnvironment(
+      loadEnvironment(
+        variableNames: environmentVariableNames,
+        envFile: envFile,
+      ),
+    );
   }
 
   factory DatabaseConfig.fromEnvironment(Map<String, String> environment) {

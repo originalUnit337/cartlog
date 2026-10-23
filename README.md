@@ -24,8 +24,9 @@ docker run --name cartlog-postgres \
   -d postgres:17
 ```
 
-Copy `.env.example` to `.env` and set `DATABASE_PORT=5434`. The remaining
-example credentials match the Docker command above.
+Copy `.env.example` to `.env`, set `DATABASE_PORT=5434`, and provide the token
+you received from Telegram's `@BotFather` as `TELEGRAM_BOT_TOKEN`. The remaining
+database example credentials match the Docker command above.
 
 Apply the initial schema:
 
@@ -35,11 +36,14 @@ docker exec -i cartlog-postgres \
   < database/migrations/001_initial_schema.sql
 ```
 
-Then verify the application can connect:
+Start the bot:
 
 ```sh
 dart run bin/cartlog.dart
 ```
+
+Open the bot in Telegram and send `/start` for the welcome message or `/list` to
+see the current cartridges.
 
 Environment variables set in the process take precedence over values in
 `.env`. Never commit the local `.env` file.

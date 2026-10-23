@@ -1,4 +1,5 @@
 export 'application/cartridge/cartridge_exceptions.dart';
+export 'application/cartridge/cartridge_query_service.dart';
 export 'application/cartridge/cartridge_service.dart';
 export 'application/cartridge/cartridge_unit_of_work.dart';
 export 'domain/cartridge/entities/cartridge.dart';
@@ -9,3 +10,7 @@ export 'domain/cartridge/entities/new_cartridge.dart';
 export 'domain/cartridge/entities/new_cartridge_log.dart';
 export 'domain/cartridge/repositories/cartridge_log_repository.dart';
 export 'domain/cartridge/repositories/cartridge_repository.dart';
+export 'infrastructure/config/app_config.dart';
+export 'infrastructure/config/telegram_bot_config.dart';
+export 'presentation/telegram/cartridge_list_formatter.dart';
+export 'presentation/telegram/telegram_bot.dart';

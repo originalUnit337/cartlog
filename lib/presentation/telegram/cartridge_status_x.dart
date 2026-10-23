@@ -1,6 +1,13 @@
 import 'package:cartlog/domain/cartridge/entities/cartridge_status.dart';
 
 extension CartridgeStatusX on CartridgeStatus {
+  String get displayEmoji => switch (this) {
+    .ready => '🟢',
+    .inUse => '🔵',
+    .empty => '🔴',
+    .refilling => '🟡',
+  };
+
   String get displayName {
     switch (this) {
       case .ready:
@@ -13,4 +20,6 @@ extension CartridgeStatusX on CartridgeStatus {
         return 'Refilling';
     }
   }
+
+  String get displayLabel => '$displayEmoji $displayName';
 }
