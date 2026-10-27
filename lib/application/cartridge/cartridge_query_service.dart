@@ -8,6 +8,8 @@ final class CartridgeQueryService {
 
   Future<List<Cartridge>> listAll() => repository.findAll();
 
+  Future<Cartridge?> findById(int id) => repository.findById(id);
+
   Future<List<Cartridge>> findByNumber(String number) =>
       repository.findByNumber(number.trim());
 

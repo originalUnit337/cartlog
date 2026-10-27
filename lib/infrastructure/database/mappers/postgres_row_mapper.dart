@@ -17,6 +17,7 @@ final class PostgresRowMapper {
       sentToRefillAt: _nullableDateTime(row, 'sent_to_refill_at'),
       readyAt: _nullableDateTime(row, 'ready_at'),
       issuedAt: _nullableDateTime(row, 'issued_at'),
+      archivedAt: _nullableDateTime(row, 'archived_at'),
       createdAt: _dateTime(row, 'created_at'),
       updatedAt: _dateTime(row, 'updated_at'),
     );
@@ -58,6 +59,7 @@ final class PostgresRowMapper {
     CartridgeLogAction.created => 'created',
     CartridgeLogAction.updated => 'updated',
     CartridgeLogAction.statusChanged => 'statusChanged',
+    CartridgeLogAction.removed => 'removed',
   };
 
   static CartridgeLogAction actionFromDatabase(Object? value) =>
@@ -65,6 +67,7 @@ final class PostgresRowMapper {
         'created' => CartridgeLogAction.created,
         'updated' => CartridgeLogAction.updated,
         'statusChanged' => CartridgeLogAction.statusChanged,
+        'removed' => CartridgeLogAction.removed,
         _ => throw FormatException(
           'Unknown cartridge log action in database: $value',
         ),

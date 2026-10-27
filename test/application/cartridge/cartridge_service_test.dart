@@ -113,6 +113,90 @@ void main() {
     );
   });
 
+  test('creates a ready cartridge and records a created log', () async {
+    final occurredAt = DateTime.utc(2026, 10, 20, 7);
+
+    final created = await service.create(
+      cartridge: const NewCartridge(
+        number: ' 001 ',
+        model: ' HP 85A ',
+        office: ' 101 ',
+      ),
+      changedBy: 'telegram:16 (@operator)',
+      occurredAt: occurredAt,
+    );
+
+    expect(created.number, '001');
+    expect(created.model, 'HP 85A');
+    expect(created.office, '101');
+    expect(created.status, CartridgeStatus.ready);
+    expect(unitOfWork.logs.records, hasLength(1));
+    expect(unitOfWork.logs.records.single.action, CartridgeLogAction.created);
+    expect(unitOfWork.logs.records.single.newStatus, CartridgeStatus.ready);
+    expect(unitOfWork.logs.records.single.occurredAt, occurredAt);
+  });
+
+  test(
+    'edits cartridge details without changing its status or dates',
+    () async {
+      final receivedAt = DateTime.utc(2026, 9, 1);
+      final initial = Cartridge(
+        id: 11,
+        number: '001',
+        model: 'Old model',
+        office: '101',
+        status: CartridgeStatus.inUse,
+        receivedAt: receivedAt,
+        createdAt: receivedAt,
+        updatedAt: receivedAt,
+      );
+      unitOfWork.cartridges.records[initial.id] = initial;
+      final occurredAt = DateTime.utc(2026, 10, 20, 7);
+
+      final updated = await service.updateDetails(
+        cartridgeId: initial.id,
+        number: '002',
+        model: 'New model',
+        office: '202',
+        changedBy: 'telegram:17',
+        occurredAt: occurredAt,
+      );
+
+      expect(updated.number, '002');
+      expect(updated.model, 'New model');
+      expect(updated.office, '202');
+      expect(updated.status, initial.status);
+      expect(updated.receivedAt, receivedAt);
+      expect(unitOfWork.logs.records.single.action, CartridgeLogAction.updated);
+      expect(unitOfWork.logs.records.single.oldStatus, initial.status);
+      expect(unitOfWork.logs.records.single.newStatus, initial.status);
+    },
+  );
+
+  test(
+    'archives without deleting the cartridge and records a removed log',
+    () async {
+      final initial = _cartridge(id: 12, status: CartridgeStatus.empty);
+      unitOfWork.cartridges.records[initial.id] = initial;
+      final archivedAt = DateTime.utc(2026, 10, 20, 8);
+
+      final archived = await service.archive(
+        cartridgeId: initial.id,
+        changedBy: 'telegram:18',
+        occurredAt: archivedAt,
+      );
+
+      expect(archived.archivedAt, archivedAt);
+      expect(unitOfWork.cartridges.records.containsKey(initial.id), isTrue);
+      expect(unitOfWork.logs.records.single.action, CartridgeLogAction.removed);
+      expect(unitOfWork.logs.records.single.occurredAt, archivedAt);
+      await expectLater(
+        service.archive(cartridgeId: initial.id, changedBy: 'telegram:18'),
+        throwsA(isA<CartridgeAlreadyArchivedException>()),
+      );
+    },
+  );
+
   test('defaults the event time to the current UTC time', () async {
     final initial = _cartridge(id: 10, status: CartridgeStatus.ready);
     unitOfWork.cartridges.records[initial.id] = initial;

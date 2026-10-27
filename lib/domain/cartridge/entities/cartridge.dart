@@ -11,6 +11,7 @@ class Cartridge {
   final DateTime? sentToRefillAt;
   final DateTime? readyAt;
   final DateTime? issuedAt;
+  final DateTime? archivedAt;
 
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -25,6 +26,7 @@ class Cartridge {
     this.sentToRefillAt,
     this.readyAt,
     this.issuedAt,
+    this.archivedAt,
     required this.createdAt,
     required this.updatedAt,
   });

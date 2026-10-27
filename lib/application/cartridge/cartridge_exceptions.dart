@@ -21,3 +21,12 @@ final class InvalidCartridgeTransitionException implements Exception {
   @override
   String toString() => 'Cannot change cartridge status from $from to $to.';
 }
+
+final class CartridgeAlreadyArchivedException implements Exception {
+  const CartridgeAlreadyArchivedException(this.cartridgeId);
+
+  final int cartridgeId;
+
+  @override
+  String toString() => 'Cartridge $cartridgeId is already archived.';
+}

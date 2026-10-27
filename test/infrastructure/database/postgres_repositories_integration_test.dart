@@ -182,6 +182,64 @@ void main() {
     }
   });
 
+  test('create, edit, and archive keep their audit history', () async {
+    final suffix = DateTime.now().microsecondsSinceEpoch.toString();
+    final created = await service.create(
+      cartridge: NewCartridge(
+        number: 'crud-test-$suffix',
+        model: 'Test model',
+        office: 'C-$suffix',
+      ),
+      changedBy: 'integration-test',
+    );
+
+    try {
+      final edited = await service.updateDetails(
+        cartridgeId: created.id,
+        number: created.number,
+        model: 'Edited model',
+        office: created.office,
+        changedBy: 'integration-test',
+      );
+      expect(edited.model, 'Edited model');
+
+      final archived = await service.archive(
+        cartridgeId: created.id,
+        changedBy: 'integration-test',
+      );
+      expect(archived.archivedAt, isNotNull);
+      final persisted = await cartridges.findById(created.id);
+      expect(persisted?.archivedAt, archived.archivedAt);
+      expect(persisted?.model, 'Edited model');
+      expect(await cartridges.findByNumber(created.number), isEmpty);
+      expect(
+        (await cartridges.findAll()).map((cartridge) => cartridge.id),
+        isNot(contains(created.id)),
+      );
+
+      final actions = (await logs.findByCartridgeId(created.id))
+          .map((log) => log.action)
+          .toSet();
+      expect(
+        actions,
+        containsAll([
+          CartridgeLogAction.created,
+          CartridgeLogAction.updated,
+          CartridgeLogAction.removed,
+        ]),
+      );
+    } finally {
+      await database.session.execute(
+        Sql.named('DELETE FROM cartridge_logs WHERE cartridge_id = @id'),
+        parameters: {'id': created.id},
+      );
+      await database.session.execute(
+        Sql.named('DELETE FROM cartridges WHERE id = @id'),
+        parameters: {'id': created.id},
+      );
+    }
+  });
+
   test('unit of work rolls back repository writes after an error', () async {
     final suffix = DateTime.now().microsecondsSinceEpoch.toString();
     final created = await cartridges.create(

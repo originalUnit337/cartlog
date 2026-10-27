@@ -34,17 +34,24 @@ Apply the initial schema:
 docker exec -i cartlog-postgres \
   psql -U cartlog -d cartlog -v ON_ERROR_STOP=1 \
   < database/migrations/001_initial_schema.sql
+
+docker exec -i cartlog-postgres \
+  psql -U cartlog -d cartlog -v ON_ERROR_STOP=1 \
+  < database/migrations/002_archive_cartridges.sql
 ```
 
 Start the bot:
 
 ```sh
-dart run bin/cartlog.dart
+dart run bin/main.dart
 ```
 
-Open the bot in Telegram and send `/start` for commands. `/list` shows all
+Open the bot in Telegram and send `/start` for commands. `/list` shows active
 cartridges, `/number 001` searches by number, and `/office 101` searches by
-office. Searches return all exact matches.
+office. `/add` returns a copyable form; a new cartridge defaults to `ready`.
+`/edit <id>` returns the current values in a copyable form. `/remove <id>`
+archives the cartridge, hiding it from active lists/search while retaining its
+record and history. Searches return all exact matches.
 
 Environment variables set in the process take precedence over values in
 `.env`. Never commit the local `.env` file.

@@ -1,1 +1,1 @@
-enum CartridgeLogAction { created, updated, statusChanged }
+enum CartridgeLogAction { created, updated, statusChanged, removed }

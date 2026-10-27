@@ -33,7 +33,7 @@ final class PostgresCartridgeRepository implements CartridgeRepository {
   @override
   Future<List<Cartridge>> findAll() async {
     final result = await session.execute(
-      'SELECT * FROM cartridges ORDER BY id',
+      'SELECT * FROM cartridges WHERE archived_at IS NULL ORDER BY id',
     );
     return result
         .map((row) => PostgresRowMapper.toCartridge(row.toColumnMap()))
@@ -43,7 +43,10 @@ final class PostgresCartridgeRepository implements CartridgeRepository {
   @override
   Future<List<Cartridge>> findByNumber(String number) async {
     final result = await session.execute(
-      Sql.named('SELECT * FROM cartridges WHERE number = @number ORDER BY id'),
+      Sql.named(
+        'SELECT * FROM cartridges WHERE number = @number '
+        'AND archived_at IS NULL ORDER BY id',
+      ),
       parameters: {'number': number},
     );
     return result
@@ -54,7 +57,10 @@ final class PostgresCartridgeRepository implements CartridgeRepository {
   @override
   Future<List<Cartridge>> findByOffice(String office) async {
     final result = await session.execute(
-      Sql.named('SELECT * FROM cartridges WHERE office = @office ORDER BY id'),
+      Sql.named(
+        'SELECT * FROM cartridges WHERE office = @office '
+        'AND archived_at IS NULL ORDER BY id',
+      ),
       parameters: {'office': office},
     );
     return result
@@ -65,7 +71,10 @@ final class PostgresCartridgeRepository implements CartridgeRepository {
   @override
   Future<List<Cartridge>> findByStatus(CartridgeStatus status) async {
     final result = await session.execute(
-      Sql.named('SELECT * FROM cartridges WHERE status = @status ORDER BY id'),
+      Sql.named(
+        'SELECT * FROM cartridges WHERE status = @status '
+        'AND archived_at IS NULL ORDER BY id',
+      ),
       parameters: {'status': PostgresRowMapper.statusToDatabase(status)},
     );
     return result
@@ -124,7 +133,8 @@ final class PostgresCartridgeRepository implements CartridgeRepository {
             received_at = @receivedAt,
             sent_to_refill_at = @sentToRefillAt,
             ready_at = @readyAt,
-            issued_at = @issuedAt
+            issued_at = @issuedAt,
+            archived_at = @archivedAt
         WHERE id = @id
         RETURNING *
       '''),
@@ -138,6 +148,7 @@ final class PostgresCartridgeRepository implements CartridgeRepository {
         'sentToRefillAt': cartridge.sentToRefillAt,
         'readyAt': cartridge.readyAt,
         'issuedAt': cartridge.issuedAt,
+        'archivedAt': cartridge.archivedAt,
       },
     );
     if (result.isEmpty) {
