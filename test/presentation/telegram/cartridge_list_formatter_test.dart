@@ -24,7 +24,7 @@ void main() {
 
     expect(
       formatter.format([cartridge]),
-      'Картриджи (1):\n• #001 — HP 85A — кабинет 101 — 🟢 Ready',
+      'Картриджи (1):\n• ID 1 · #001 — HP 85A — кабинет 101 — 🟢 Ready',
     );
   });
 
@@ -57,6 +57,8 @@ void main() {
     );
 
     expect(result, contains('найдено: 2'));
+    expect(result, contains('ID 1 · #001'));
+    expect(result, contains('ID 2 · #001'));
     expect(result, contains('#001 — HP 85A — кабинет 101'));
     expect(result, contains('#001 — HP 85A — кабинет 102'));
   });

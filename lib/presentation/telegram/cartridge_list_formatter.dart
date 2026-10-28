@@ -24,7 +24,8 @@ final class CartridgeListFormatter {
     return cartridges
         .map(
           (cartridge) =>
-              '• #${cartridge.number} — ${cartridge.model} — кабинет '
+              '• ID ${cartridge.id} · #${cartridge.number} — '
+              '${cartridge.model} — кабинет '
               '${cartridge.office} — ${cartridge.status.displayLabel}',
         )
         .join('\n');
