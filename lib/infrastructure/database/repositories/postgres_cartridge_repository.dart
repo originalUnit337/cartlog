@@ -41,6 +41,25 @@ final class PostgresCartridgeRepository implements CartridgeRepository {
   }
 
   @override
+  Future<List<Cartridge>> findPage({
+    required int offset,
+    required int limit,
+  }) async {
+    final result = await session.execute(
+      Sql.named('''
+        SELECT * FROM cartridges
+        WHERE archived_at IS NULL
+        ORDER BY id
+        LIMIT @limit OFFSET @offset
+      '''),
+      parameters: {'limit': limit, 'offset': offset},
+    );
+    return result
+        .map((row) => PostgresRowMapper.toCartridge(row.toColumnMap()))
+        .toList();
+  }
+
+  @override
   Future<List<Cartridge>> findByNumber(String number) async {
     final result = await session.execute(
       Sql.named(
@@ -55,6 +74,26 @@ final class PostgresCartridgeRepository implements CartridgeRepository {
   }
 
   @override
+  Future<List<Cartridge>> findByNumberPage(
+    String number, {
+    required int offset,
+    required int limit,
+  }) async {
+    final result = await session.execute(
+      Sql.named('''
+        SELECT * FROM cartridges
+        WHERE number = @number AND archived_at IS NULL
+        ORDER BY id
+        LIMIT @limit OFFSET @offset
+      '''),
+      parameters: {'number': number, 'limit': limit, 'offset': offset},
+    );
+    return result
+        .map((row) => PostgresRowMapper.toCartridge(row.toColumnMap()))
+        .toList();
+  }
+
+  @override
   Future<List<Cartridge>> findByOffice(String office) async {
     final result = await session.execute(
       Sql.named(
@@ -62,6 +101,26 @@ final class PostgresCartridgeRepository implements CartridgeRepository {
         'AND archived_at IS NULL ORDER BY id',
       ),
       parameters: {'office': office},
+    );
+    return result
+        .map((row) => PostgresRowMapper.toCartridge(row.toColumnMap()))
+        .toList();
+  }
+
+  @override
+  Future<List<Cartridge>> findByOfficePage(
+    String office, {
+    required int offset,
+    required int limit,
+  }) async {
+    final result = await session.execute(
+      Sql.named('''
+        SELECT * FROM cartridges
+        WHERE office = @office AND archived_at IS NULL
+        ORDER BY id
+        LIMIT @limit OFFSET @offset
+      '''),
+      parameters: {'office': office, 'limit': limit, 'offset': offset},
     );
     return result
         .map((row) => PostgresRowMapper.toCartridge(row.toColumnMap()))

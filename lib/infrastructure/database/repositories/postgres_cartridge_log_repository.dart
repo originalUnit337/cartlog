@@ -62,6 +62,26 @@ final class PostgresCartridgeLogRepository implements CartridgeLogRepository {
         .toList();
   }
 
+  @override
+  Future<List<CartridgeLog>> findLatestByCartridgeId(
+    int cartridgeId, {
+    required int limit,
+  }) async {
+    final result = await session.execute(
+      Sql.named('''
+        SELECT *
+        FROM cartridge_logs
+        WHERE cartridge_id = @cartridgeId
+        ORDER BY occurred_at DESC, id DESC
+        LIMIT @limit
+      '''),
+      parameters: {'cartridgeId': cartridgeId, 'limit': limit},
+    );
+    return result
+        .map((row) => PostgresRowMapper.toCartridgeLog(row.toColumnMap()))
+        .toList();
+  }
+
   String? _nullableStatusToDatabase(CartridgeStatus? status) {
     return status == null ? null : PostgresRowMapper.statusToDatabase(status);
   }

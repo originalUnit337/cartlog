@@ -78,12 +78,28 @@ void main() {
         (await cartridges.findAll()).map((cartridge) => cartridge.id),
         contains(first.id),
       );
+      final activePage = await cartridgeQueries.listPage(pageSize: 1);
+      expect(activePage.items, hasLength(1));
+      expect(activePage.hasNext, isTrue);
       expect(await cartridges.findByNumber(first.number), hasLength(2));
       expect(await cartridges.findByOffice('T-$suffix'), hasLength(2));
       expect(
         await cartridgeQueries.findByNumber(' ${first.number} '),
         hasLength(2),
       );
+      final numberPage = await cartridgeQueries.findByNumberPage(
+        first.number,
+        pageSize: 1,
+      );
+      final nextNumberPage = await cartridgeQueries.findByNumberPage(
+        first.number,
+        page: 1,
+        pageSize: 1,
+      );
+      expect(numberPage.items.single.id, first.id);
+      expect(numberPage.hasNext, isTrue);
+      expect(nextNumberPage.items.single.id, duplicateNumber.id);
+      expect(nextNumberPage.hasNext, isFalse);
       expect(await cartridgeQueries.findByOffice(' T-$suffix '), hasLength(2));
       expect(await cartridgeQueries.findByNumber('missing-$suffix'), isEmpty);
       expect(

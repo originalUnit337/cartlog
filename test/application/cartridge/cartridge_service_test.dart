@@ -319,12 +319,39 @@ final class _MemoryCartridgeRepository implements CartridgeRepository {
   Future<List<Cartridge>> findAll() async => records.values.toList();
 
   @override
+  Future<List<Cartridge>> findPage({
+    required int offset,
+    required int limit,
+  }) async {
+    final active =
+        records.values
+            .where((cartridge) => cartridge.archivedAt == null)
+            .toList()
+          ..sort((left, right) => left.id.compareTo(right.id));
+    return active.skip(offset).take(limit).toList();
+  }
+
+  @override
   Future<List<Cartridge>> findByNumber(String number) async =>
       records.values.where((cartridge) => cartridge.number == number).toList();
 
   @override
+  Future<List<Cartridge>> findByNumberPage(
+    String number, {
+    required int offset,
+    required int limit,
+  }) async => (await findByNumber(number)).skip(offset).take(limit).toList();
+
+  @override
   Future<List<Cartridge>> findByOffice(String office) async =>
       records.values.where((cartridge) => cartridge.office == office).toList();
+
+  @override
+  Future<List<Cartridge>> findByOfficePage(
+    String office, {
+    required int offset,
+    required int limit,
+  }) async => (await findByOffice(office)).skip(offset).take(limit).toList();
 
   @override
   Future<List<Cartridge>> findByStatus(CartridgeStatus status) async =>
@@ -386,4 +413,10 @@ final class _MemoryCartridgeLogRepository implements CartridgeLogRepository {
   @override
   Future<List<CartridgeLog>> findByCartridgeId(int cartridgeId) async =>
       records.where((log) => log.cartridgeId == cartridgeId).toList();
+
+  @override
+  Future<List<CartridgeLog>> findLatestByCartridgeId(
+    int cartridgeId, {
+    required int limit,
+  }) async => (await findByCartridgeId(cartridgeId)).take(limit).toList();
 }

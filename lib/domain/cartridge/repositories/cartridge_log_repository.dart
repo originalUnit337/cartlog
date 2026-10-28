@@ -5,4 +5,9 @@ abstract interface class CartridgeLogRepository {
   Future<CartridgeLog> create(NewCartridgeLog log);
 
   Future<List<CartridgeLog>> findByCartridgeId(int cartridgeId);
+
+  Future<List<CartridgeLog>> findLatestByCartridgeId(
+    int cartridgeId, {
+    required int limit,
+  });
 }

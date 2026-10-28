@@ -10,9 +10,23 @@ abstract interface class CartridgeRepository {
 
   Future<List<Cartridge>> findAll();
 
+  Future<List<Cartridge>> findPage({required int offset, required int limit});
+
   Future<List<Cartridge>> findByNumber(String number);
 
+  Future<List<Cartridge>> findByNumberPage(
+    String number, {
+    required int offset,
+    required int limit,
+  });
+
   Future<List<Cartridge>> findByOffice(String office);
+
+  Future<List<Cartridge>> findByOfficePage(
+    String office, {
+    required int offset,
+    required int limit,
+  });
 
   Future<List<Cartridge>> findByStatus(CartridgeStatus status);
 

@@ -46,12 +46,14 @@ Start the bot:
 dart run bin/main.dart
 ```
 
-Open the bot in Telegram and send `/start` for commands. `/list` shows active
-cartridges, `/number 001` searches by number, and `/office 101` searches by
-office. `/add` returns a copyable form; a new cartridge defaults to `ready`.
-`/edit <id>` returns the current values in a copyable form. `/remove <id>`
-archives the cartridge, hiding it from active lists/search while retaining its
-record and history. Searches return all exact matches.
+Open the bot in Telegram and send `/start` to show the persistent button menu.
+Use **Картриджи**, **Поиск**, or **Добавить** to navigate. Cartridge lists and
+search results are paginated; select a result to open its detail card and use
+the status, edit, history, and archive buttons. Slash commands remain available
+as fallbacks: `/list`, `/number 001`, `/office 101`, `/add`, `/edit <id>`, and
+`/remove <id>`. Add/edit use copyable forms; new cartridges default to `ready`.
+Remove archives the record, hiding it from active lists and searches while
+retaining its history.
 
 Environment variables set in the process take precedence over values in
 `.env`. Never commit the local `.env` file.

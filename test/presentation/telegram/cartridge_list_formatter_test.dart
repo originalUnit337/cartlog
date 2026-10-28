@@ -24,7 +24,7 @@ void main() {
 
     expect(
       formatter.format([cartridge]),
-      'Картриджи (1):\n• ID 1 · #001 — HP 85A — кабинет 101 — 🟢 Ready',
+      'Картриджи (1):\n• ID 1 · #001 — HP 85A — кабинет 101 — 🟢 Готов',
     );
   });
 

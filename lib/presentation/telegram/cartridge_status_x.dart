@@ -11,13 +11,13 @@ extension CartridgeStatusX on CartridgeStatus {
   String get displayName {
     switch (this) {
       case .ready:
-        return 'Ready';
+        return 'Готов';
       case .inUse:
-        return 'In use';
+        return 'Используется';
       case .empty:
-        return 'Empty';
+        return 'Пуст';
       case .refilling:
-        return 'Refilling';
+        return 'На заправке';
     }
   }
 

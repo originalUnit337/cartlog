@@ -11,6 +11,13 @@ final class CartridgeService {
 
   final CartridgeUnitOfWork unitOfWork;
 
+  CartridgeStatus? nextStatusFor(CartridgeStatus current) => switch (current) {
+    CartridgeStatus.ready => CartridgeStatus.inUse,
+    CartridgeStatus.inUse => CartridgeStatus.empty,
+    CartridgeStatus.empty => CartridgeStatus.refilling,
+    CartridgeStatus.refilling => CartridgeStatus.ready,
+  };
+
   Future<Cartridge> create({
     required NewCartridge cartridge,
     required String changedBy,
@@ -200,13 +207,7 @@ final class CartridgeService {
   }
 
   bool _isAllowedTransition(CartridgeStatus from, CartridgeStatus to) {
-    return switch ((from, to)) {
-      (CartridgeStatus.ready, CartridgeStatus.inUse) ||
-      (CartridgeStatus.inUse, CartridgeStatus.empty) ||
-      (CartridgeStatus.empty, CartridgeStatus.refilling) ||
-      (CartridgeStatus.refilling, CartridgeStatus.ready) => true,
-      _ => false,
-    };
+    return nextStatusFor(from) == to;
   }
 
   Cartridge _withStatus(

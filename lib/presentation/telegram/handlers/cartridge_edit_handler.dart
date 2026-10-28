@@ -31,7 +31,7 @@ final class CartridgeEditHandler {
 
       final fields = lines.skip(1).join('\n').trim();
       if (fields.isEmpty) {
-        await _sendTemplate(context, cartridgeId);
+        await showTemplate(context, cartridgeId);
         return;
       }
 
@@ -60,7 +60,7 @@ final class CartridgeEditHandler {
     });
   }
 
-  Future<void> _sendTemplate(Context context, int cartridgeId) async {
+  Future<void> showTemplate(Context context, int cartridgeId) async {
     final cartridge = await queryService.findById(cartridgeId);
     if (cartridge == null) {
       await context.reply('Картридж с ID $cartridgeId не найден.');

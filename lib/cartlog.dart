@@ -1,4 +1,6 @@
 export 'application/cartridge/cartridge_exceptions.dart';
+export 'application/cartridge/cartridge_history_query_service.dart';
+export 'application/cartridge/cartridge_page.dart';
 export 'application/cartridge/cartridge_query_service.dart';
 export 'application/cartridge/cartridge_service.dart';
 export 'application/cartridge/cartridge_unit_of_work.dart';
@@ -14,6 +16,11 @@ export 'infrastructure/config/app_config.dart';
 export 'infrastructure/config/telegram_bot_config.dart';
 export 'presentation/telegram/cartridge_list_formatter.dart';
 export 'presentation/telegram/cartridge_form_template.dart';
+export 'presentation/telegram/cartridge_browser.dart';
+export 'presentation/telegram/cartridge_detail_formatter.dart';
+export 'presentation/telegram/cartridge_history_formatter.dart';
+export 'presentation/telegram/telegram_menu_labels.dart';
+export 'presentation/telegram/handlers/cartridge_detail_handler.dart';
 export 'presentation/telegram/handlers/cartridge_add_handler.dart';
 export 'presentation/telegram/handlers/cartridge_edit_handler.dart';
 export 'presentation/telegram/handlers/cartridge_remove_handler.dart';
