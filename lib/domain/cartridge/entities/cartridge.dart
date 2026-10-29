@@ -1,4 +1,4 @@
-import 'package:cartlog/cartridge/models/cartridge_status.dart';
+import 'package:cartlog/domain/cartridge/entities/cartridge_status.dart';
 
 class Cartridge {
   final int id;
@@ -8,23 +8,25 @@ class Cartridge {
   final CartridgeStatus status;
 
   final DateTime? receivedAt;
-  final DateTime? sentToRefilAt;
+  final DateTime? sentToRefillAt;
   final DateTime? readyAt;
   final DateTime? issuedAt;
+  final DateTime? archivedAt;
 
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  Cartridge({
+  const Cartridge({
     required this.id,
     required this.number,
     required this.model,
     required this.office,
     required this.status,
     this.receivedAt,
-    this.sentToRefilAt,
+    this.sentToRefillAt,
     this.readyAt,
     this.issuedAt,
+    this.archivedAt,
     required this.createdAt,
     required this.updatedAt,
   });
