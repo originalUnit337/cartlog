@@ -47,13 +47,19 @@ dart run bin/main.dart
 ```
 
 Open the bot in Telegram and send `/start` to show the persistent button menu.
-Use **Картриджи**, **Поиск**, or **Добавить** to navigate. Cartridge lists and
-search results are paginated; select a result to open its detail card and use
-the status, edit, history, and archive buttons. Slash commands remain available
-as fallbacks: `/list`, `/number 001`, `/office 101`, `/add`, `/edit <id>`, and
-`/remove <id>`. Add/edit use copyable forms; new cartridges default to `ready`.
-Remove archives the record, hiding it from active lists and searches while
-retaining its history.
+Use **Картриджи**, **Поиск**, **Добавить**, or **Импорт CSV** to navigate.
+Cartridge lists and search results are paginated; select a result to open its
+detail card and use the status, edit, history, and archive buttons. Slash
+commands remain available as fallbacks: `/list`, `/number 001`, `/office 101`,
+`/add`, `/edit <id>`, `/remove <id>`, and `/import`. Add/edit use copyable forms;
+new cartridges default to `ready`. Remove archives the record, hiding it from
+active lists and searches while retaining its history.
+
+CSV import accepts semicolon-separated exports encoded as UTF-8 or Windows-1251.
+It previews invalid rows and possible duplicate numbers before confirmation.
+Duplicates are always imported as new records; existing cartridges are never
+updated or deleted. For the supplied Russian export, `принят` maps to `ready`,
+blank status defaults to `ready`, and blank offices map to `-`.
 
 Environment variables set in the process take precedence over values in
 `.env`. Never commit the local `.env` file.

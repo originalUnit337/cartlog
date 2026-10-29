@@ -3,10 +3,12 @@ import 'dart:io';
 
 import 'package:cartlog/application/cartridge/cartridge_query_service.dart';
 import 'package:cartlog/application/cartridge/cartridge_history_query_service.dart';
+import 'package:cartlog/application/cartridge/cartridge_import_service.dart';
 import 'package:cartlog/application/cartridge/cartridge_service.dart';
 import 'package:cartlog/infrastructure/config/app_config.dart';
 import 'package:cartlog/infrastructure/database/postgres_database.dart';
 import 'package:cartlog/infrastructure/database/postgres_cartridge_unit_of_work.dart';
+import 'package:cartlog/infrastructure/cartridge_import/csv_cartridge_parser.dart';
 import 'package:cartlog/infrastructure/database/repositories/postgres_cartridge_log_repository.dart';
 import 'package:cartlog/infrastructure/database/repositories/postgres_cartridge_repository.dart';
 import 'package:cartlog/presentation/telegram/telegram_bot.dart';
@@ -33,6 +35,11 @@ Future<void> main() async {
       repository: cartridgeLogRepository,
     ),
     cartridgeService: CartridgeService(unitOfWork: unitOfWork),
+    cartridgeImportService: CartridgeImportService(
+      parser: const CsvCartridgeParser(),
+      repository: cartridgeRepository,
+      unitOfWork: unitOfWork,
+    ),
   );
   final signalSubscriptions = [
     ProcessSignal.sigint.watch().listen((_) => unawaited(bot.stop())),

@@ -10,9 +10,10 @@ final class StartHandler {
 • «Картриджи» — открыть список и карточки
 • «Поиск» — найти по номеру или кабинету
 • «Добавить» — создать картридж
+• «Импорт CSV» — проверить и импортировать файл
 
 В карточке доступны изменение данных, статуса, история и архивирование.
-Команды /list, /number, /office, /add, /edit и /remove также доступны.
+Команды /list, /number, /office, /add, /edit, /remove и /import также доступны.
 ''';
 
   void register(Bot<Context> bot, {required KeyboardMenu<Context> menu}) {

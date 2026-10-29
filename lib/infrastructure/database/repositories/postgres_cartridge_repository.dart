@@ -74,6 +74,31 @@ final class PostgresCartridgeRepository implements CartridgeRepository {
   }
 
   @override
+  Future<List<Cartridge>> findByNumbers(List<String> numbers) async {
+    final uniqueNumbers = numbers.toSet().toList();
+    if (uniqueNumbers.isEmpty) return const [];
+
+    final parameters = <String, Object?>{};
+    final placeholders = <String>[];
+    for (final (index, number) in uniqueNumbers.indexed) {
+      final parameterName = 'number$index';
+      placeholders.add('@$parameterName');
+      parameters[parameterName] = number;
+    }
+
+    final result = await session.execute(
+      Sql.named(
+        'SELECT * FROM cartridges '
+        'WHERE number IN (${placeholders.join(', ')}) ORDER BY number, id',
+      ),
+      parameters: parameters,
+    );
+    return result
+        .map((row) => PostgresRowMapper.toCartridge(row.toColumnMap()))
+        .toList();
+  }
+
+  @override
   Future<List<Cartridge>> findByNumberPage(
     String number, {
     required int offset,

@@ -1,4 +1,5 @@
 import 'package:cartlog/application/cartridge/cartridge_service.dart';
+import 'package:cartlog/application/cartridge/cartridge_import_service.dart';
 import 'package:cartlog/application/cartridge/cartridge_history_query_service.dart';
 import 'package:cartlog/application/cartridge/cartridge_query_service.dart';
 import 'package:cartlog/presentation/telegram/handlers/cartridge_add_handler.dart';
@@ -6,6 +7,7 @@ import 'package:cartlog/presentation/telegram/cartridge_browser.dart';
 import 'package:cartlog/presentation/telegram/handlers/cartridge_detail_handler.dart';
 import 'package:cartlog/presentation/telegram/handlers/cartridge_list_handler.dart';
 import 'package:cartlog/presentation/telegram/handlers/cartridge_edit_handler.dart';
+import 'package:cartlog/presentation/telegram/handlers/cartridge_import_handler.dart';
 import 'package:cartlog/presentation/telegram/handlers/cartridge_remove_handler.dart';
 import 'package:cartlog/presentation/telegram/handlers/cartridge_search_handler.dart';
 import 'package:cartlog/presentation/telegram/handlers/start_handler.dart';
@@ -19,14 +21,19 @@ final class TelegramBot {
     required CartridgeQueryService cartridgeQueryService,
     required CartridgeHistoryQueryService cartridgeHistoryQueryService,
     required CartridgeService cartridgeService,
+    required CartridgeImportService cartridgeImportService,
   }) : _bot = Bot<Context>(token) {
     final browser = CartridgeBrowser(queryService: cartridgeQueryService);
     final listHandler = CartridgeListHandler(browser: browser);
     final addHandler = CartridgeAddHandler(cartridgeService: cartridgeService);
+    final importHandler = CartridgeImportHandler(
+      importService: cartridgeImportService,
+    );
     final searchHandler = CartridgeSearchHandler(
       queryService: cartridgeQueryService,
       browser: browser,
       onAddPressed: addHandler.showTemplate,
+      onImportPressed: importHandler.prompt,
     );
     final editHandler = CartridgeEditHandler(
       cartridgeService: cartridgeService,
@@ -48,6 +55,7 @@ final class TelegramBot {
     addHandler.register(_bot);
     editHandler.register(_bot);
     CartridgeRemoveHandler(cartridgeService: cartridgeService).register(_bot);
+    importHandler.register(_bot);
     CartridgeDetailHandler(
       queryService: cartridgeQueryService,
       historyQueryService: cartridgeHistoryQueryService,
@@ -61,6 +69,7 @@ final class TelegramBot {
         .text(TelegramMenuLabels.search, searchHandler.showSearchOptions)
         .row()
         .text(TelegramMenuLabels.add, addHandler.showTemplate)
+        .text(TelegramMenuLabels.importCsv, importHandler.prompt)
         .resized()
         .persistent();
     _bot.attachMenu(menu);

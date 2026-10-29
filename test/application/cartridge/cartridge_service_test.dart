@@ -336,6 +336,12 @@ final class _MemoryCartridgeRepository implements CartridgeRepository {
       records.values.where((cartridge) => cartridge.number == number).toList();
 
   @override
+  Future<List<Cartridge>> findByNumbers(List<String> numbers) async => records
+      .values
+      .where((cartridge) => numbers.contains(cartridge.number))
+      .toList();
+
+  @override
   Future<List<Cartridge>> findByNumberPage(
     String number, {
     required int offset,

@@ -10,6 +10,7 @@ final class CartridgeSearchHandler {
     required this.queryService,
     required this.browser,
     required this.onAddPressed,
+    required this.onImportPressed,
   });
 
   static const _searchTimeout = Duration(minutes: 2);
@@ -17,6 +18,7 @@ final class CartridgeSearchHandler {
   final CartridgeQueryService queryService;
   final CartridgeBrowser browser;
   final Future<void> Function(Context context) onAddPressed;
+  final Future<void> Function(Context context) onImportPressed;
 
   void registerConversations(Bot<Context> bot) {
     bot
@@ -149,6 +151,11 @@ final class CartridgeSearchHandler {
         if (value == TelegramMenuLabels.add) {
           await conversation.halt();
           await onAddPressed(response);
+          return;
+        }
+        if (value == TelegramMenuLabels.importCsv) {
+          await conversation.halt();
+          await onImportPressed(response);
           return;
         }
         if (value.startsWith('/')) {

@@ -14,6 +14,9 @@ abstract interface class CartridgeRepository {
 
   Future<List<Cartridge>> findByNumber(String number);
 
+  /// Finds all records for the supplied numbers, including archived records.
+  Future<List<Cartridge>> findByNumbers(List<String> numbers);
+
   Future<List<Cartridge>> findByNumberPage(
     String number, {
     required int offset,

@@ -1,7 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cartlog/application/cartridge/cartridge_service.dart';
 import 'package:cartlog/application/cartridge/cartridge_query_service.dart';
+import 'package:cartlog/application/cartridge/cartridge_import_service.dart';
 import 'package:cartlog/domain/cartridge/entities/cartridge.dart';
 import 'package:cartlog/domain/cartridge/entities/cartridge_log_action.dart';
 import 'package:cartlog/domain/cartridge/entities/cartridge_status.dart';
@@ -12,6 +15,7 @@ import 'package:cartlog/infrastructure/database/postgres_database.dart';
 import 'package:cartlog/infrastructure/database/postgres_cartridge_unit_of_work.dart';
 import 'package:cartlog/infrastructure/database/repositories/postgres_cartridge_log_repository.dart';
 import 'package:cartlog/infrastructure/database/repositories/postgres_cartridge_repository.dart';
+import 'package:cartlog/infrastructure/cartridge_import/csv_cartridge_parser.dart';
 import 'package:postgres/postgres.dart';
 import 'package:test/test.dart';
 
@@ -29,6 +33,7 @@ void main() {
   late PostgresCartridgeRepository cartridges;
   late PostgresCartridgeLogRepository logs;
   late CartridgeQueryService cartridgeQueries;
+  late CartridgeImportService importService;
   late PostgresCartridgeUnitOfWork unitOfWork;
   late CartridgeService service;
 
@@ -41,6 +46,11 @@ void main() {
       sessionExecutor: database.sessionExecutor,
     );
     service = CartridgeService(unitOfWork: unitOfWork);
+    importService = CartridgeImportService(
+      parser: const CsvCartridgeParser(),
+      repository: cartridges,
+      unitOfWork: unitOfWork,
+    );
   });
 
   tearDownAll(() async {
@@ -255,6 +265,74 @@ void main() {
       );
     }
   });
+
+  test(
+    'CSV preview warns about duplicate numbers and imports all rows',
+    () async {
+      final suffix = DateTime.now().microsecondsSinceEpoch.toString();
+      final number = 'csv-import-$suffix';
+      final existing = await cartridges.create(
+        NewCartridge(
+          number: number,
+          model: 'Existing model',
+          office: 'I-$suffix',
+        ),
+      );
+
+      final csv = [
+        'number;model;office;status;source_date;comment',
+        '$number;First model;I-$suffix;ready;20.10.2026;first note',
+        '$number;Second model;I-$suffix;in_use;21.10.2026;second note',
+      ].join('\n');
+      final preview = await importService.preview(
+        Uint8List.fromList(utf8.encode(csv)),
+      );
+      final importedIds = <int>[];
+
+      try {
+        expect(preview.rowCount, 2);
+        expect(preview.rows, hasLength(2));
+        expect(preview.errors, isEmpty);
+        expect(preview.duplicates, hasLength(1));
+        expect(preview.duplicates.single.fileRowNumbers, [2, 3]);
+        expect(
+          preview.duplicates.single.existingCartridges.map((c) => c.id),
+          contains(existing.id),
+        );
+
+        final imported = await importService.importValidRows(
+          preview: preview,
+          changedBy: 'integration-test',
+        );
+        importedIds.addAll(imported.map((cartridge) => cartridge.id));
+
+        expect(imported, hasLength(2));
+        expect(
+          imported.map((cartridge) => cartridge.id),
+          isNot(contains(existing.id)),
+        );
+        expect(await cartridges.findByNumber(number), hasLength(3));
+        final firstLog = await logs.findByCartridgeId(imported.first.id);
+        expect(firstLog.single.action, CartridgeLogAction.created);
+        expect(firstLog.single.comment, 'first note');
+        expect(firstLog.single.occurredAt, DateTime.utc(2026, 10, 20));
+      } finally {
+        final ids = [existing.id, ...importedIds];
+        for (final id in ids) {
+          await database.session.execute(
+            Sql.named('DELETE FROM cartridge_logs WHERE cartridge_id = @id'),
+            parameters: {'id': id},
+          );
+        }
+        for (final id in ids) {
+          await database.session.execute(
+            Sql.named('DELETE FROM cartridges WHERE id = @id'),
+            parameters: {'id': id},
+          );
+        }
+      }
+    },
+  );
 
   test('unit of work rolls back repository writes after an error', () async {
     final suffix = DateTime.now().microsecondsSinceEpoch.toString();
