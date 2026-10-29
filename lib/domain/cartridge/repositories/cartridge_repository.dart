@@ -23,10 +23,12 @@ abstract interface class CartridgeRepository {
     required int limit,
   });
 
-  Future<List<Cartridge>> findByOffice(String office);
+  /// Finds active cartridges whose office starts with [officePrefix].
+  Future<List<Cartridge>> findByOffice(String officePrefix);
 
+  /// Finds a page of active cartridges whose office starts with [officePrefix].
   Future<List<Cartridge>> findByOfficePage(
-    String office, {
+    String officePrefix, {
     required int offset,
     required int limit,
   });

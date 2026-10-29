@@ -75,11 +75,19 @@ void main() {
         NewCartridge(
           number: first.number,
           model: 'Second model',
-          office: 'T-$suffix',
+          office: 'T-$suffix-2',
           status: CartridgeStatus.inUse,
         ),
       );
       cartridgeIds.add(duplicateNumber.id);
+      final substringOffice = await cartridges.create(
+        NewCartridge(
+          number: 'substring-test-$suffix',
+          model: 'Third model',
+          office: 'X-T-$suffix',
+        ),
+      );
+      cartridgeIds.add(substringOffice.id);
 
       final foundById = await cartridges.findById(first.id);
       expect(foundById?.id, first.id);
@@ -93,6 +101,7 @@ void main() {
       expect(activePage.hasNext, isTrue);
       expect(await cartridges.findByNumber(first.number), hasLength(2));
       expect(await cartridges.findByOffice('T-$suffix'), hasLength(2));
+      expect(await cartridges.findByOffice('X-T-$suffix'), hasLength(1));
       expect(
         await cartridgeQueries.findByNumber(' ${first.number} '),
         hasLength(2),
@@ -110,7 +119,25 @@ void main() {
       expect(numberPage.hasNext, isTrue);
       expect(nextNumberPage.items.single.id, duplicateNumber.id);
       expect(nextNumberPage.hasNext, isFalse);
+      final firstOfficePage = await cartridgeQueries.findByOfficePage(
+        'T-$suffix',
+        pageSize: 1,
+      );
+      final nextOfficePage = await cartridgeQueries.findByOfficePage(
+        'T-$suffix',
+        page: 1,
+        pageSize: 1,
+      );
+      expect(firstOfficePage.items, hasLength(1));
+      expect(firstOfficePage.hasNext, isTrue);
+      expect(nextOfficePage.items, hasLength(1));
+      expect(nextOfficePage.hasNext, isFalse);
       expect(await cartridgeQueries.findByOffice(' T-$suffix '), hasLength(2));
+      expect(await cartridgeQueries.findByOffice('t-$suffix'), hasLength(2));
+      expect(
+        (await cartridgeQueries.findByOffice('T-$suffix')).map((c) => c.id),
+        isNot(contains(substringOffice.id)),
+      );
       expect(await cartridgeQueries.findByNumber('missing-$suffix'), isEmpty);
       expect(
         (await cartridges.findByStatus(CartridgeStatus.inUse)).map((c) => c.id),

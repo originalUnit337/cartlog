@@ -15,8 +15,11 @@ final class CartridgeQueryService {
   Future<List<Cartridge>> findByNumber(String number) =>
       repository.findByNumber(number.trim());
 
-  Future<List<Cartridge>> findByOffice(String office) =>
-      repository.findByOffice(office.trim());
+  Future<List<Cartridge>> findByOffice(String office) {
+    final prefix = office.trim();
+    if (prefix.isEmpty) return Future.value(const []);
+    return repository.findByOffice(prefix);
+  }
 
   Future<CartridgePage> listPage({int page = 0, int pageSize = 10}) {
     return _loadPage(
@@ -48,14 +51,13 @@ final class CartridgeQueryService {
     int page = 0,
     int pageSize = 10,
   }) {
+    final prefix = office.trim();
     return _loadPage(
       page: page,
       pageSize: pageSize,
-      fetch: (offset, limit) => repository.findByOfficePage(
-        office.trim(),
-        offset: offset,
-        limit: limit,
-      ),
+      fetch: (offset, limit) => prefix.isEmpty
+          ? Future.value(const <Cartridge>[])
+          : repository.findByOfficePage(prefix, offset: offset, limit: limit),
     );
   }
 

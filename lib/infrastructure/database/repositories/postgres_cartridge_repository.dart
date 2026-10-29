@@ -119,13 +119,14 @@ final class PostgresCartridgeRepository implements CartridgeRepository {
   }
 
   @override
-  Future<List<Cartridge>> findByOffice(String office) async {
+  Future<List<Cartridge>> findByOffice(String officePrefix) async {
     final result = await session.execute(
       Sql.named(
-        'SELECT * FROM cartridges WHERE office = @office '
+        'SELECT * FROM cartridges '
+        'WHERE starts_with(lower(office), lower(@officePrefix)) '
         'AND archived_at IS NULL ORDER BY id',
       ),
-      parameters: {'office': office},
+      parameters: {'officePrefix': officePrefix},
     );
     return result
         .map((row) => PostgresRowMapper.toCartridge(row.toColumnMap()))
@@ -134,18 +135,23 @@ final class PostgresCartridgeRepository implements CartridgeRepository {
 
   @override
   Future<List<Cartridge>> findByOfficePage(
-    String office, {
+    String officePrefix, {
     required int offset,
     required int limit,
   }) async {
     final result = await session.execute(
       Sql.named('''
         SELECT * FROM cartridges
-        WHERE office = @office AND archived_at IS NULL
+        WHERE starts_with(lower(office), lower(@officePrefix))
+          AND archived_at IS NULL
         ORDER BY id
         LIMIT @limit OFFSET @offset
       '''),
-      parameters: {'office': office, 'limit': limit, 'offset': offset},
+      parameters: {
+        'officePrefix': officePrefix,
+        'limit': limit,
+        'offset': offset,
+      },
     );
     return result
         .map((row) => PostgresRowMapper.toCartridge(row.toColumnMap()))

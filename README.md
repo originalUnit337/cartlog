@@ -55,6 +55,9 @@ commands remain available as fallbacks: `/list`, `/number 001`, `/office 101`,
 new cartridges default to `ready`. Remove archives the record, hiding it from
 active lists and searches while retaining its history.
 
+Number searches match the exact cartridge number; office searches match an
+office prefix, so searching `504` also finds `504-1` and `504-2`.
+
 CSV import accepts semicolon-separated exports encoded as UTF-8 or Windows-1251.
 It previews invalid rows and possible duplicate numbers before confirmation.
 Duplicates are always imported as new records; existing cartridges are never

@@ -349,8 +349,13 @@ final class _MemoryCartridgeRepository implements CartridgeRepository {
   }) async => (await findByNumber(number)).skip(offset).take(limit).toList();
 
   @override
-  Future<List<Cartridge>> findByOffice(String office) async =>
-      records.values.where((cartridge) => cartridge.office == office).toList();
+  Future<List<Cartridge>> findByOffice(String office) async => records.values
+      .where(
+        (cartridge) =>
+            cartridge.archivedAt == null &&
+            cartridge.office.toLowerCase().startsWith(office.toLowerCase()),
+      )
+      .toList();
 
   @override
   Future<List<Cartridge>> findByOfficePage(
