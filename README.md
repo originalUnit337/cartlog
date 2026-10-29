@@ -46,6 +46,47 @@ Start the bot:
 dart run bin/main.dart
 ```
 
+## Deploy to Debian with Docker Compose
+
+The repository includes a Dockerfile and Compose setup for the bot plus a new
+PostgreSQL 17 database. On Debian, verify Docker Compose is available, then clone
+the `dev` branch and configure the server environment:
+
+```sh
+git clone -b dev https://github.com/originalUnit337/cartlog.git
+cd cartlog
+cp .env.example .env
+nano .env
+```
+
+Set a strong `DATABASE_PASSWORD` and your real `TELEGRAM_BOT_TOKEN`. For Compose,
+the bot connects to the database service at `db:5432`; the Compose file sets
+these values internally. Start the services with:
+
+```sh
+docker compose config --quiet
+docker compose up -d --build
+docker compose ps
+docker compose logs -f bot
+```
+
+The bot uses long polling and requires outbound access to Telegram, so no
+inbound bot port or public PostgreSQL port is published. Compose stores database
+files in the `postgres_data` named volume. The SQL files in
+`database/migrations/` run automatically only when that volume is first
+initialized. `docker compose down` preserves the volume; `docker compose down -v`
+deletes the database.
+
+To deploy later code changes, pull `dev` and rebuild the bot:
+
+```sh
+git pull origin dev
+docker compose up -d --build bot
+```
+
+New SQL migrations are not rerun on an existing volume; apply each new migration
+once before restarting the bot.
+
 Open the bot in Telegram and send `/start` to show the persistent button menu.
 Use **Картриджи**, **Поиск**, **Добавить**, or **Импорт CSV** to navigate.
 Cartridge lists and search results are paginated; select a result to open its
