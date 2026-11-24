@@ -17,7 +17,7 @@ final class CartridgeHistoryFormatter {
         CartridgeLogAction.removed => 'Убран из активного списка',
       };
       final eventDate = _date(log.occurredAt);
-      return '• $eventDate — $action\n  Выполнил: ${log.changedBy}';
+      return '• $eventDate — $action\n  Выполнил: ${_actorLabel(log.changedBy)}';
     });
 
     return 'История картриджа ID $cartridgeId:\n${entries.join('\n')}';
@@ -28,5 +28,14 @@ final class CartridgeHistoryFormatter {
     final month = date.month.toString().padLeft(2, '0');
     final day = date.day.toString().padLeft(2, '0');
     return '${date.year}-$month-$day';
+  }
+
+  String _actorLabel(String changedBy) {
+    final actor = changedBy.trim();
+    if (!actor.startsWith('telegram:')) return actor;
+
+    final match = RegExp(r'^telegram:\d+\s*(?:\((@[^)]+)\))?$')
+        .firstMatch(actor);
+    return match?.group(1) ?? 'пользователь Telegram';
   }
 }
