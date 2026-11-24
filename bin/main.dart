@@ -5,12 +5,15 @@ import 'package:cartlog/application/cartridge/cartridge_query_service.dart';
 import 'package:cartlog/application/cartridge/cartridge_history_query_service.dart';
 import 'package:cartlog/application/cartridge/cartridge_import_service.dart';
 import 'package:cartlog/application/cartridge/cartridge_service.dart';
+import 'package:cartlog/application/telegram/telegram_user_service.dart';
 import 'package:cartlog/infrastructure/config/app_config.dart';
 import 'package:cartlog/infrastructure/database/postgres_database.dart';
 import 'package:cartlog/infrastructure/database/postgres_cartridge_unit_of_work.dart';
+import 'package:cartlog/infrastructure/database/postgres_dump_backup_provider.dart';
 import 'package:cartlog/infrastructure/cartridge_import/csv_cartridge_parser.dart';
 import 'package:cartlog/infrastructure/database/repositories/postgres_cartridge_log_repository.dart';
 import 'package:cartlog/infrastructure/database/repositories/postgres_cartridge_repository.dart';
+import 'package:cartlog/infrastructure/database/repositories/postgres_telegram_user_repository.dart';
 import 'package:cartlog/presentation/telegram/telegram_bot.dart';
 
 /// Configures dependencies and starts the Telegram bot.
@@ -21,6 +24,9 @@ Future<void> main() async {
     session: database.session,
   );
   final cartridgeLogRepository = PostgresCartridgeLogRepository(
+    session: database.session,
+  );
+  final telegramUserRepository = PostgresTelegramUserRepository(
     session: database.session,
   );
   final unitOfWork = PostgresCartridgeUnitOfWork(
@@ -39,6 +45,12 @@ Future<void> main() async {
       parser: const CsvCartridgeParser(),
       repository: cartridgeRepository,
       unitOfWork: unitOfWork,
+    ),
+    telegramBotConfig: config.telegramBot,
+    databaseConfig: config.database,
+    databaseBackupProvider: PostgresDumpBackupProvider(config: config.database),
+    telegramUserService: TelegramUserService(
+      repository: telegramUserRepository,
     ),
   );
   final signalSubscriptions = [

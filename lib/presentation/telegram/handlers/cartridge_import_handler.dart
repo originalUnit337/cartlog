@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:cartlog/application/cartridge/cartridge_import_models.dart';
 import 'package:cartlog/application/cartridge/cartridge_import_service.dart';
 import 'package:cartlog/presentation/telegram/telegram_changed_by.dart';
+import 'package:cartlog/presentation/telegram/telegram_menu_labels.dart';
 import 'package:televerse/televerse.dart';
 import 'package:televerse/telegram.dart';
 
@@ -20,6 +21,7 @@ final class CartridgeImportHandler {
   void register(Bot<Context> bot) {
     bot.command('import', prompt);
     bot.onDocument(_receiveCsv);
+    bot.text(TelegramMenuLabels.importCsv, prompt);
     bot.callbackQuery(
       RegExp(r'^import:(confirm|cancel):'),
       _handleConfirmation,

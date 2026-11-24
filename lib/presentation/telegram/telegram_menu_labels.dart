@@ -3,4 +3,5 @@ abstract final class TelegramMenuLabels {
   static const search = '🔎 Поиск';
   static const add = '➕ Добавить';
   static const importCsv = '📥 Импорт CSV';
+  static const databaseBackup = '💾 Резервная копия БД';
 }

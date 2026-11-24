@@ -11,6 +11,7 @@ final class CartridgeSearchHandler {
     required this.browser,
     required this.onAddPressed,
     required this.onImportPressed,
+    required this.onBackupPressed,
   });
 
   static const _searchTimeout = Duration(minutes: 2);
@@ -19,6 +20,7 @@ final class CartridgeSearchHandler {
   final CartridgeBrowser browser;
   final Future<void> Function(Context context) onAddPressed;
   final Future<void> Function(Context context) onImportPressed;
+  final Future<void> Function(Context context) onBackupPressed;
 
   void registerConversations(Bot<Context> bot) {
     bot
@@ -76,6 +78,7 @@ final class CartridgeSearchHandler {
       await context.answerCallbackQuery();
       await context.conversation.enter('search-office');
     });
+    bot.text(TelegramMenuLabels.search, showSearchOptions);
   }
 
   Future<void> showSearchOptions(Context context) async {
@@ -156,6 +159,11 @@ final class CartridgeSearchHandler {
         if (value == TelegramMenuLabels.importCsv) {
           await conversation.halt();
           await onImportPressed(response);
+          return;
+        }
+        if (value == TelegramMenuLabels.databaseBackup) {
+          await conversation.halt();
+          await onBackupPressed(response);
           return;
         }
         if (value.startsWith('/')) {
