@@ -35,11 +35,14 @@ final class CartridgeQueryService {
     int page = 0,
     int pageSize = 10,
   }) {
+    final prefix = number.trim();
     return _loadPage(
       page: page,
       pageSize: pageSize,
-      fetch: (offset, limit) => repository.findByNumberPage(
-        number.trim(),
+      fetch: (offset, limit) => prefix.isEmpty
+          ? Future.value(const <Cartridge>[]) 
+          : repository.findByNumberPage(
+        prefix,
         offset: offset,
         limit: limit,
       ),

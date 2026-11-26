@@ -17,8 +17,9 @@ abstract interface class CartridgeRepository {
   /// Finds all records for the supplied numbers, including archived records.
   Future<List<Cartridge>> findByNumbers(List<String> numbers);
 
+  /// Finds a page of active cartridges whose number starts with [numberPrefix].
   Future<List<Cartridge>> findByNumberPage(
-    String number, {
+    String numberPrefix, {
     required int offset,
     required int limit,
   });

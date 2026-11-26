@@ -107,7 +107,7 @@ final class PostgresCartridgeRepository implements CartridgeRepository {
     final result = await session.execute(
       Sql.named('''
         SELECT * FROM cartridges
-        WHERE number = @number AND archived_at IS NULL
+        WHERE starts_with(lower(number), lower(@number)) AND archived_at IS NULL
         ORDER BY id
         LIMIT @limit OFFSET @offset
       '''),
