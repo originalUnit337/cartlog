@@ -1,6 +1,7 @@
 import 'package:cartlog/application/cartridge/cartridge_page.dart';
 import 'package:cartlog/application/cartridge/cartridge_query_service.dart';
 import 'package:cartlog/domain/cartridge/entities/cartridge.dart';
+import 'package:cartlog/presentation/telegram/cartridge_status_x.dart';
 import 'package:televerse/televerse.dart';
 import 'package:televerse/telegram.dart';
 
@@ -151,7 +152,7 @@ final class CartridgeBrowser {
 
   String _buttonLabel(Cartridge cartridge) {
     final label =
-        'ID ${cartridge.id} · #${cartridge.number} · ${cartridge.office}';
+        'ID ${cartridge.id} · #${cartridge.number} · ${cartridge.office} · ${cartridge.status.displayLabel}';
     return label.length <= 52 ? label : '${label.substring(0, 49)}…';
   }
 }
