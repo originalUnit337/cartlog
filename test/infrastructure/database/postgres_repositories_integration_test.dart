@@ -10,12 +10,15 @@ import 'package:cartlog/domain/cartridge/entities/cartridge_log_action.dart';
 import 'package:cartlog/domain/cartridge/entities/cartridge_status.dart';
 import 'package:cartlog/domain/cartridge/entities/new_cartridge.dart';
 import 'package:cartlog/domain/cartridge/entities/new_cartridge_log.dart';
+import 'package:cartlog/domain/telegram/entities/telegram_user_profile.dart';
 import 'package:cartlog/infrastructure/database/database_config.dart';
 import 'package:cartlog/infrastructure/database/postgres_database.dart';
 import 'package:cartlog/infrastructure/database/postgres_cartridge_unit_of_work.dart';
 import 'package:cartlog/infrastructure/database/repositories/postgres_cartridge_log_repository.dart';
 import 'package:cartlog/infrastructure/database/repositories/postgres_cartridge_repository.dart';
 import 'package:cartlog/infrastructure/cartridge_import/csv_cartridge_parser.dart';
+import 'package:cartlog/infrastructure/database/postgres_dump_backup_provider.dart';
+import 'package:cartlog/infrastructure/database/repositories/postgres_telegram_user_repository.dart';
 import 'package:postgres/postgres.dart';
 import 'package:test/test.dart';
 
@@ -30,17 +33,21 @@ void main() {
   }
 
   late PostgresDatabase database;
+  late DatabaseConfig databaseConfig;
   late PostgresCartridgeRepository cartridges;
   late PostgresCartridgeLogRepository logs;
+  late PostgresTelegramUserRepository telegramUsers;
   late CartridgeQueryService cartridgeQueries;
   late CartridgeImportService importService;
   late PostgresCartridgeUnitOfWork unitOfWork;
   late CartridgeService service;
 
   setUpAll(() async {
-    database = await PostgresDatabase.connect(DatabaseConfig.load());
+    databaseConfig = DatabaseConfig.load();
+    database = await PostgresDatabase.connect(databaseConfig);
     cartridges = PostgresCartridgeRepository(session: database.session);
     logs = PostgresCartridgeLogRepository(session: database.session);
+    telegramUsers = PostgresTelegramUserRepository(session: database.session);
     cartridgeQueries = CartridgeQueryService(repository: cartridges);
     unitOfWork = PostgresCartridgeUnitOfWork(
       sessionExecutor: database.sessionExecutor,
@@ -357,6 +364,86 @@ void main() {
             parameters: {'id': id},
           );
         }
+      }
+    },
+  );
+
+  test('pg_dump creates a valid custom-format database backup', () async {
+    final backup = await PostgresDumpBackupProvider(config: databaseConfig)
+        .createBackup();
+    final backupDirectory = backup.directory;
+
+    try {
+      expect(await backup.file.length(), greaterThan(0));
+      final listing = await Process.run('pg_restore', [
+        '--list',
+        backup.file.path,
+      ]);
+      expect(listing.exitCode, 0, reason: listing.stderr.toString());
+      expect(listing.stdout, contains('TABLE public cartridges'));
+      expect(listing.stdout, contains('TABLE public cartridge_logs'));
+    } finally {
+      await backup.dispose();
+      expect(await backupDirectory.exists(), isFalse);
+    }
+  });
+
+  test(
+    'telegram profile upsert preserves first seen and refreshes last seen',
+    () async {
+      final telegramId = DateTime.now().microsecondsSinceEpoch;
+
+      try {
+        await telegramUsers.upsertInteraction(
+          TelegramUserProfile(
+            telegramId: telegramId,
+            firstName: 'Test user',
+            username: 'before_update',
+            languageCode: 'en',
+            isPremium: false,
+            addedToAttachmentMenu: false,
+          ),
+        );
+        final initialResult = await database.session.execute(
+          Sql.named('SELECT * FROM telegram_users WHERE telegram_id = @id'),
+          parameters: {'id': telegramId},
+        );
+        final initial = initialResult.single.toColumnMap();
+
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+        await telegramUsers.upsertInteraction(
+          TelegramUserProfile(
+            telegramId: telegramId,
+            firstName: 'Test user updated',
+            username: 'after_update',
+            languageCode: 'ru',
+            isPremium: true,
+            addedToAttachmentMenu: true,
+          ),
+        );
+        final updatedResult = await database.session.execute(
+          Sql.named('SELECT * FROM telegram_users WHERE telegram_id = @id'),
+          parameters: {'id': telegramId},
+        );
+        final updated = updatedResult.single.toColumnMap();
+
+        expect(updated['first_name'], 'Test user updated');
+        expect(updated['username'], 'after_update');
+        expect(updated['language_code'], 'ru');
+        expect(updated['is_premium'], isTrue);
+        expect(updated['added_to_attachment_menu'], isTrue);
+        expect(updated['first_seen_at'], initial['first_seen_at']);
+        expect(
+          (updated['last_seen_at'] as DateTime).isAfter(
+            initial['last_seen_at'] as DateTime,
+          ),
+          isTrue,
+        );
+      } finally {
+        await database.session.execute(
+          Sql.named('DELETE FROM telegram_users WHERE telegram_id = @id'),
+          parameters: {'id': telegramId},
+        );
       }
     },
   );

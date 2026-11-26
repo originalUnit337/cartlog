@@ -12,6 +12,10 @@ RUN dart compile exe bin/main.dart -o /app/cartlog
 
 FROM dart:stable AS runtime
 
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends postgresql-client-17 \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 COPY --from=build /app/cartlog ./cartlog
 

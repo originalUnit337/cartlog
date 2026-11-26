@@ -3,6 +3,7 @@ import 'package:cartlog/domain/cartridge/entities/new_cartridge.dart';
 import 'package:cartlog/presentation/telegram/cartridge_form_template.dart';
 import 'package:cartlog/presentation/telegram/telegram_changed_by.dart';
 import 'package:cartlog/presentation/telegram/cartridge_status_x.dart';
+import 'package:cartlog/presentation/telegram/telegram_menu_labels.dart';
 import 'package:televerse/televerse.dart';
 
 final class CartridgeAddHandler {
@@ -12,6 +13,7 @@ final class CartridgeAddHandler {
 
   void register(Bot<Context> bot) {
     bot.command('add', handle);
+    bot.text(TelegramMenuLabels.add, showTemplate);
   }
 
   Future<void> showTemplate(Context context) async {

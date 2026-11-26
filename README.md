@@ -38,6 +38,10 @@ docker exec -i cartlog-postgres \
 docker exec -i cartlog-postgres \
   psql -U cartlog -d cartlog -v ON_ERROR_STOP=1 \
   < database/migrations/002_archive_cartridges.sql
+
+docker exec -i cartlog-postgres \
+  psql -U cartlog -d cartlog -v ON_ERROR_STOP=1 \
+  < database/migrations/003_telegram_users.sql
 ```
 
 Start the bot:
@@ -87,8 +91,42 @@ docker compose up -d --build bot
 New SQL migrations are not rerun on an existing volume; apply each new migration
 once before restarting the bot.
 
+The bot records Telegram profiles on every incoming interaction in
+`telegram_users` (including button presses). It stores Telegram-provided profile
+fields and first/last-seen timestamps, not message contents or phone numbers.
+For an existing database, apply migration `003_telegram_users.sql` once before
+restarting the updated bot. You can inspect the registry with:
+
+```sh
+docker compose exec db psql -U cartlog -d cartlog \
+  -c 'SELECT telegram_id, username, first_name, last_name, language_code, is_premium, first_seen_at, last_seen_at FROM telegram_users ORDER BY last_seen_at DESC;'
+```
+
+## Admin database backup
+
+Set `TELEGRAM_ADMIN_IDS` to a comma-separated list of Telegram numeric user IDs
+in the server `.env`. To find your ID, start the bot and send `/myid` in a
+private chat. Only allowlisted IDs see the backup button, and the bot refuses
+backup requests outside private chats. An empty allowlist disables backup.
+After changing the list and recreating the bot container, send `/start` again to
+refresh the menu in your Telegram chat.
+
+The bot uses `pg_dump` from the PostgreSQL 17 client tools in its container. A
+backup is sent as a custom-format `.dump` file and removed from temporary server
+storage after sending. Treat the downloaded file as sensitive. Restore
+instructions accompany the file; restore is destructive to the target database,
+so make a current backup first and stop the bot while restoring.
+
+After changing `TELEGRAM_ADMIN_IDS`, recreate the bot container so it loads the
+updated allowlist:
+
+```sh
+docker compose up -d --build bot
+```
+
 Open the bot in Telegram and send `/start` to show the persistent button menu.
 Use **Картриджи**, **Поиск**, **Добавить**, or **Импорт CSV** to navigate.
+Allowlisted admins also see **Резервная копия БД** in private chats.
 Cartridge lists and search results are paginated; select a result to open its
 detail card and use the status, edit, history, and archive buttons. Slash
 commands remain available as fallbacks: `/list`, `/number 001`, `/office 101`,
